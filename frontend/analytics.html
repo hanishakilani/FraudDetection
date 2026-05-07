@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FraudGuard — Analytics</title>
+  <link rel="stylesheet" href="css/style.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+</head>
+<body>
+<nav>
+  <a href="index.html" class="brand">🛡 <span>FraudGuard</span></a>
+  <a href="index.html">Dashboard</a>
+  <a href="predict.html">Analyze</a>
+  <a href="history.html">History</a>
+  <a href="bulk.html">Bulk</a>
+  <a href="analytics.html">Analytics</a>
+  <a href="model.html">Model</a>
+  <a href="alerts.html">Alerts</a>
+</nav>
+
+<div class="container">
+  <h1 class="page-title">Fraud Pattern Analytics</h1>
+
+  <div class="grid-2">
+    <div class="card"><h2>Fraud by Hour of Day</h2><canvas id="hourChart" height="220"></canvas></div>
+    <div class="card"><h2>Fraud by Amount Range</h2><canvas id="amountChart" height="220"></canvas></div>
+  </div>
+
+  <div class="card" style="margin-top:1.5rem">
+    <h2>30-Day Trend</h2>
+    <canvas id="trendChart" height="160"></canvas>
+  </div>
+
+  <div class="card" style="margin-top:1.5rem">
+    <h2>🏆 Top 10 Riskiest Transactions</h2>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>ID</th><th>Amount</th><th>Risk Score</th><th>Level</th><th>Top Reason</th><th>Date</th></tr></thead>
+        <tbody id="top10-body"><tr><td colspan="6" style="text-align:center;color:var(--muted)">Loading...</td></tr></tbody>
+      </table>
+    </div>
+  </div>
+
+  <div style="display:flex;gap:1rem;margin-top:1.5rem;flex-wrap:wrap">
+    <a href="/export/csv" class="btn btn-outline">⬇ Export all CSV</a>
+    <a href="/export/pdf" class="btn btn-outline">⬇ Export fraud PDF report</a>
+    <a href="/export/csv?label=Fraud" class="btn btn-outline" style="color:var(--danger);border-color:var(--danger)">⬇ Export fraud CSV only</a>
+  </div>
+</div>
+<!-- Risk Matrix Heatmap — replace the old heatmap div -->
+<div class="card card-glow-red" style="margin-bottom:1.5rem">
+  <h2>Risk Matrix — Category × Severity</h2>
+  <div style="overflow-x:auto;margin-top:.75rem">
+    <table style="width:100%;border-collapse:separate;border-spacing:4px">
+      <thead>
+        <tr>
+          <th style="background:transparent;color:var(--text3);font-size:.68rem;padding:.4rem .6rem;text-align:left">Risk Category</th>
+          <th style="background:rgba(16,185,129,.15);color:var(--green-lt);font-size:.68rem;padding:.5rem;text-align:center;border-radius:6px">LOW</th>
+          <th style="background:rgba(245,158,11,.15);color:var(--amber-lt);font-size:.68rem;padding:.5rem;text-align:center;border-radius:6px">MEDIUM</th>
+          <th style="background:rgba(239,68,68,.15);color:var(--red-lt);font-size:.68rem;padding:.5rem;text-align:center;border-radius:6px">HIGH</th>
+          <th style="background:rgba(124,58,237,.15);color:var(--purple-lt);font-size:.68rem;padding:.5rem;text-align:center;border-radius:6px">CRITICAL</th>
+          <th style="background:rgba(239,68,68,.25);color:#fca5a5;font-size:.68rem;padding:.5rem;text-align:center;border-radius:6px">EXTREME</th>
+        </tr>
+      </thead>
+      <tbody id="risk-matrix-body"></tbody>
+    </table>
+  </div>
+  <div style="display:flex;gap:1rem;margin-top:.75rem;font-size:.72rem;flex-wrap:wrap">
+    <span>🟩 Acceptable</span>
+    <span>🟨 Monitor</span>
+    <span>🟧 Review Required</span>
+    <span>🟥 Immediate Action</span>
+    <span>🟪 Critical Response</span>
+  </div>
+</div>
+
+<script src="js/analytics.js"></script>
+<script>
+function toggleDark() {
+  document.body.classList.toggle("dark");
+  const btn = document.querySelector(".dark-toggle");
+  const dark = document.body.classList.contains("dark");
+  localStorage.setItem("fg_dark", dark);
+  btn.textContent = dark ? "☀️ Light" : "🌙 Dark";
+}
+// Restore preference on load
+if (localStorage.getItem("fg_dark") === "true") {
+  document.body.classList.add("dark");
+  document.querySelector(".dark-toggle").textContent = "☀️ Light";
+}
+</script>
+</body>
+</html>

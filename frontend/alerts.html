@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FraudGuard — Alerts</title>
+  <link rel="stylesheet" href="css/style.css">
+  <script src="https://cdn.jsdelivr.net/npm/socket.io-client@4.6.1/dist/socket.io.min.js"></script>
+</head>
+<body>
+
+<nav>
+  <a href="index.html" class="brand">🛡 <span>FraudGuard</span></a>
+  <a href="index.html">Dashboard</a>
+  <a href="predict.html">Analyze</a>
+  <a href="history.html">History</a>
+  <a href="bulk.html">Bulk</a>
+  <a href="analytics.html">Analytics</a>
+  <a href="model.html">Model</a>
+  <a href="alerts.html">Alerts</a>
+</nav>
+
+<div class="container">
+  <h1 class="page-title">Alert System <span>· Real-time fraud notifications</span></h1>
+
+  <!-- Alert severity guide -->
+  <div class="card" style="margin-bottom:1.5rem">
+    <h2>Alert Severity Levels</h2>
+    <div style="display:flex;flex-direction:column;gap:.6rem;margin-top:.25rem">
+
+      <div class="alert-level" style="background:rgba(99,102,241,.1);border-left:4px solid #6366f1;border-radius:0 8px 8px 0;padding:.9rem 1.1rem;display:flex;align-items:center;gap:12px">
+        <span style="font-size:1.1rem">ℹ️</span>
+        <div style="flex:1">
+          <div style="display:flex;align-items:center;gap:.5rem">
+            <span style="font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;background:rgba(99,102,241,.2);color:#a5b4fc;padding:.15rem .6rem;border-radius:999px">Primary</span>
+          </div>
+          <div style="font-size:.85rem;color:var(--text2);margin-top:.2rem">This is a primary alert — informational, no action required</div>
+        </div>
+      </div>
+
+      <div class="alert-level" style="background:rgba(100,116,139,.1);border-left:4px solid #64748b;border-radius:0 8px 8px 0;padding:.9rem 1.1rem;display:flex;align-items:center;gap:12px">
+        <span style="font-size:1.1rem">📋</span>
+        <div style="flex:1">
+          <div style="display:flex;align-items:center;gap:.5rem">
+            <span style="font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;background:rgba(100,116,139,.2);color:#94a3b8;padding:.15rem .6rem;border-radius:999px">Secondary</span>
+          </div>
+          <div style="font-size:.85rem;color:var(--text2);margin-top:.2rem">This is a secondary alert — routine monitoring update</div>
+        </div>
+      </div>
+
+      <div class="alert-level" style="background:rgba(16,185,129,.1);border-left:4px solid #10b981;border-radius:0 8px 8px 0;padding:.9rem 1.1rem;display:flex;align-items:center;gap:12px">
+        <span style="font-size:1.1rem">✅</span>
+        <div style="flex:1">
+          <div style="display:flex;align-items:center;gap:.5rem">
+            <span style="font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;background:rgba(16,185,129,.2);color:var(--green-lt);padding:.15rem .6rem;border-radius:999px">Success</span>
+          </div>
+          <div style="font-size:.85rem;color:var(--text2);margin-top:.2rem">This is a success alert — transaction cleared, no fraud detected</div>
+        </div>
+      </div>
+
+      <div class="alert-level" style="background:rgba(239,68,68,.1);border-left:4px solid #ef4444;border-radius:0 8px 8px 0;padding:.9rem 1.1rem;display:flex;align-items:center;gap:12px">
+        <span style="font-size:1.1rem">🚨</span>
+        <div style="flex:1">
+          <div style="display:flex;align-items:center;gap:.5rem">
+            <span style="font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;background:rgba(239,68,68,.2);color:var(--red-lt);padding:.15rem .6rem;border-radius:999px">Danger</span>
+          </div>
+          <div style="font-size:.85rem;color:var(--text2);margin-top:.2rem">This is a danger alert — fraud detected, immediate action required</div>
+        </div>
+      </div>
+
+      <div class="alert-level" style="background:rgba(245,158,11,.1);border-left:4px solid #f59e0b;border-radius:0 8px 8px 0;padding:.9rem 1.1rem;display:flex;align-items:center;gap:12px">
+        <span style="font-size:1.1rem">⚠️</span>
+        <div style="flex:1">
+          <div style="display:flex;align-items:center;gap:.5rem">
+            <span style="font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;background:rgba(245,158,11,.2);color:var(--amber-lt);padding:.15rem .6rem;border-radius:999px">Warning</span>
+          </div>
+          <div style="font-size:.85rem;color:var(--text2);margin-top:.2rem">This is a warning alert — suspicious activity, review recommended</div>
+        </div>
+      </div>
+
+      <div class="alert-level" style="background:rgba(6,182,212,.1);border-left:4px solid #06b6d4;border-radius:0 8px 8px 0;padding:.9rem 1.1rem;display:flex;align-items:center;gap:12px">
+        <span style="font-size:1.1rem">🔵</span>
+        <div style="flex:1">
+          <div style="display:flex;align-items:center;gap:.5rem">
+            <span style="font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;background:rgba(6,182,212,.15);color:var(--cyan-lt);padding:.15rem .6rem;border-radius:999px">Info</span>
+          </div>
+          <div style="font-size:.85rem;color:var(--text2);margin-top:.2rem">This is an info alert — system status and model updates</div>
+        </div>
+      </div>
+
+      <div class="alert-level" style="background:rgba(124,58,237,.12);border-left:4px solid #7c3aed;border-radius:0 8px 8px 0;padding:.9rem 1.1rem;display:flex;align-items:center;gap:12px">
+        <span style="font-size:1.1rem">🔒</span>
+        <div style="flex:1">
+          <div style="display:flex;align-items:center;gap:.5rem">
+            <span style="font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;background:rgba(124,58,237,.2);color:var(--purple-lt);padding:.15rem .6rem;border-radius:999px">Theft</span>
+          </div>
+          <div style="font-size:.85rem;color:var(--text2);margin-top:.2rem">This is a theft alert — high-confidence fraud, account at risk</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="grid-2">
+
+    <!-- AI Agent Activity Feed -->
+    <div class="card card-glow-purple">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem">
+        <h2 style="margin-bottom:0">AI Agent Activity</h2>
+        <span class="glow-dot purple"></span>
+      </div>
+      <div id="ai-activity-feed">
+        <div class="empty-state"><div class="icon">🤖</div><p style="font-size:.85rem">Loading AI activity...</p></div>
+      </div>
+    </div>
+
+    <!-- Live incoming alerts -->
+    <div class="card card-glow-red">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem">
+        <h2 style="margin-bottom:0">Live Fraud Alerts</h2>
+        <div style="display:flex;align-items:center;gap:.5rem">
+          <span class="glow-dot red"></span>
+          <span style="font-size:.72rem;color:var(--text2)">Real-time</span>
+        </div>
+      </div>
+      <div id="live-alerts-feed">
+        <div class="empty-state"><div class="icon">🔔</div><p style="font-size:.85rem">Waiting for alerts...</p></div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Average Fraud Score gauge + country breakdown -->
+  <div class="grid-2" style="margin-top:1.5rem">
+
+    <div class="card card-glow-cyan">
+      <h2>Average Fraud Score</h2>
+      <div style="display:flex;align-items:center;gap:2rem;margin-top:.5rem;flex-wrap:wrap">
+        <!-- Gauge -->
+        <div style="position:relative;width:160px;height:160px;flex-shrink:0">
+          <canvas id="gaugeChart" width="160" height="160"></canvas>
+          <div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center">
+            <div style="font-size:2rem;font-weight:700;color:var(--cyan-lt)" id="gauge-value">—</div>
+            <div style="font-size:.7rem;color:var(--text2);text-transform:uppercase;letter-spacing:.06em" id="gauge-label">Loading</div>
+          </div>
+        </div>
+        <!-- Country breakdown bars -->
+        <div style="flex:1;min-width:150px" id="score-breakdown-list"></div>
+      </div>
+    </div>
+
+    <!-- Audit tracker -->
+    <div class="card">
+      <h2>Compliance Audit Tracker</h2>
+      <div style="display:flex;align-items:center;gap:2rem;margin-top:.5rem;flex-wrap:wrap">
+        <div style="text-align:center">
+          <div style="font-size:3rem;font-weight:700;color:var(--purple-lt)" id="audit-count">—</div>
+          <div style="font-size:.72rem;color:var(--text2);text-transform:uppercase;letter-spacing:.08em">Audits Run</div>
+        </div>
+        <div style="flex:1">
+          <div id="audit-metrics" style="display:flex;flex-direction:column;gap:.5rem"></div>
+        </div>
+      </div>
+      <div style="margin-top:1.2rem;padding-top:1rem;border-top:1px solid var(--border)">
+        <h2 style="margin-bottom:.75rem">Insights</h2>
+        <div id="audit-insights" style="display:flex;flex-direction:column;gap:.5rem"></div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script src="js/alerts.js"></script>
+</body>
+</html>

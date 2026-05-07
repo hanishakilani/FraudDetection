@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FraudGuard — Dashboard</title>
+  <link rel="stylesheet" href="css/style.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+</head>
+<body>
+
+<nav>
+  <a href="index.html" class="brand">🛡 <span>FraudGuard</span></a>
+  <a href="index.html">Dashboard</a>
+  <a href="predict.html">Analyze</a>
+  <a href="history.html">History</a>
+  <a href="bulk.html">Bulk</a>
+  <a href="analytics.html">Analytics</a>
+  <a href="model.html">Model</a>
+  <a href="alerts.html">Alerts</a>
+</nav>
+<div class="container">
+  <h1 class="page-title">Overview</h1>
+
+  <div class="grid-4" id="stats-grid">
+    <div class="stat-card primary"><div class="label">Total Transactions</div><div class="value" id="stat-total">—</div></div>
+    <div class="stat-card danger"> <div class="label">Fraud Detected</div>   <div class="value" id="stat-fraud">—</div></div>
+    <div class="stat-card success"><div class="label">Legitimate</div>        <div class="value" id="stat-legit">—</div></div>
+    <div class="stat-card warning"><div class="label">Fraud Rate</div>        <div class="value" id="stat-rate">—</div> </div>
+  </div>
+
+  <div class="grid-2" style="margin-top:1.5rem">
+    <div class="card"><h2>Fraud vs Legitimate</h2><canvas id="donutChart" height="220"></canvas></div>
+    <div class="card"><h2>Risk Level Distribution</h2><canvas id="riskChart" height="220"></canvas></div>
+  </div>
+
+  <div class="grid-2" style="margin-top:1.5rem">
+    <div class="card"><h2>7-Day Trend</h2><canvas id="trendChart" height="200"></canvas></div>
+    <div class="card">
+      <h2>⚠️ Recent High-Risk Alerts</h2>
+      <div id="alert-list"><div class="empty-state">Loading...</div></div>
+    </div>
+  </div>
+</div>
+
+<script src="js/dashboard.js"></script>
+<script>
+function toggleDark() {
+  document.body.classList.toggle("dark");
+  const btn = document.querySelector(".dark-toggle");
+  const dark = document.body.classList.contains("dark");
+  localStorage.setItem("fg_dark", dark);
+  btn.textContent = dark ? "☀️ Light" : "🌙 Dark";
+}
+// Restore preference on load
+if (localStorage.getItem("fg_dark") === "true") {
+  document.body.classList.add("dark");
+  document.querySelector(".dark-toggle").textContent = "☀️ Light";
+}
+</script>
+</body>
+</html>

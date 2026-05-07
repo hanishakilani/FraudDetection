@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FraudGuard — Sign In</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body class="auth-bg">
+
+<div class="auth-card">
+  <div style="text-align:center;margin-bottom:2rem">
+    <div style="font-size:2.5rem;margin-bottom:.5rem">🛡</div>
+    <h1 style="font-size:1.4rem;font-weight:700;background:linear-gradient(135deg,var(--purple-lt),var(--cyan));-webkit-background-clip:text;-webkit-text-fill-color:transparent">
+      FraudGuard
+    </h1>
+    <p style="color:var(--text2);font-size:.85rem;margin-top:.3rem">Sign in to your dashboard</p>
+  </div>
+
+  <div id="error-box" style="display:none;background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.3);border-radius:8px;padding:.75rem 1rem;color:var(--red-lt);font-size:.85rem;margin-bottom:1rem"></div>
+
+  <div id="success-box" style="display:none;background:rgba(16,185,129,.1);border:1px solid rgba(16,185,129,.3);border-radius:8px;padding:.75rem 1rem;color:var(--green-lt);font-size:.85rem;margin-bottom:1rem"></div>
+
+  <div class="form-group">
+    <label>Email</label>
+    <input type="email" id="email" placeholder="you@example.com" autocomplete="email">
+  </div>
+  <div class="form-group">
+    <label>Password</label>
+    <input type="password" id="password" placeholder="••••••••" autocomplete="current-password">
+  </div>
+
+  <button class="btn btn-primary" style="width:100%;justify-content:center;margin-top:.5rem" id="login-btn" onclick="login()">
+    Sign In
+  </button>
+
+  <p style="text-align:center;margin-top:1.2rem;font-size:.85rem;color:var(--text2)">
+    No account?
+    <a href="register.html" style="color:var(--cyan)">Register here</a>
+    &nbsp;·&nbsp;
+    <a href="index.html" style="color:var(--text3)">Skip login</a>
+  </p>
+
+  <!-- Backend status indicator -->
+  <div id="backend-status" style="text-align:center;margin-top:1rem;font-size:.75rem;color:var(--text3)">
+    Checking backend...
+  </div>
+</div>
+
+<script>
+const API = "http://localhost:3000";
+
+// Check if already logged in
+const existingToken = localStorage.getItem("fg_token");
+if (existingToken) {
+  // Verify token is still valid before redirecting
+  fetch(`${API}/auth/me`, {
+    headers: { "Authorization": `Bearer ${existingToken}` }
+  })
+  .then(r => {
+    if (r.ok) window.location.href = "index.html";
+    else localStorage.clear(); // Token expired, clear it
+  })
+  .catch(() => {
+    // Backend down, clear token and stay on login
+    localStorage.clear();
+  });
+}
+
+// Check backend connection on load
+async function checkBackend() {
+  const statusEl = document.getElementById("backend-status");
+  try {
+    const res = await fetch(`${API}/health`, { signal: AbortSignal.timeout(3000) });
+    if (res.ok) {
+      statusEl.innerHTML = `<span style="color:var(--green-lt)">● Backend connected</span>`;
+    } else {
+      statusEl.innerHTML = `<span style="color:var(--amber-lt)">● Backend responding with errors</span>`;
+    }
+  } catch (err) {
+    statusEl.innerHTML = `<span style="color:var(--red-lt)">● Backend offline — start Node.js first</span>`;
+  }
+}
+
+checkBackend();
+
+async function login() {
+  const btn   = document.getElementById("login-btn");
+  const email = document.getElementById("email").value.trim();
+  const pass  = document.getElementById("password").value;
+
+  hideMessages();
+  if (!email || !pass) return showError("Please enter your email and password");
+
+  btn.disabled  = true;
+  btn.innerHTML = `<span class="spinner"></span> Signing in...`;
+
+  try {
+    const res  = await fetch(`${API}/auth/login`, {
+      method:  "POST",
+      headers: { "Content-Type": "application/json" },
+      body:    JSON.stringify({ email, password: pass })
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      throw new Error(data.error || `Server error ${res.status}`);
+    }
+
+    localStorage.setItem("fg_token", data.token);
+    localStorage.setItem("fg_user",  JSON.stringify(data.user));
+
+    showSuccess("Login successful! Redirecting...");
+    setTimeout(() => window.location.href = "index.html", 800);
+
+  } catch (err) {
+    if (err.name === "TypeError" && err.message.includes("fetch")) {
+      showError("Cannot connect to backend. Make sure Node.js is running on port 3000.");
+    } else {
+      showError(err.message);
+    }
+  } finally {
+    btn.disabled  = false;
+    btn.innerHTML = "Sign In";
+  }
+}
+
+function showError(msg) {
+  const b = document.getElementById("error-box");
+  b.textContent  = "⚠️ " + msg;
+  b.style.display = "block";
+  document.getElementById("success-box").style.display = "none";
+}
+
+function showSuccess(msg) {
+  const b = document.getElementById("success-box");
+  b.textContent  = "✅ " + msg;
+  b.style.display = "block";
+  document.getElementById("error-box").style.display = "none";
+}
+
+function hideMessages() {
+  document.getElementById("error-box").style.display   = "none";
+  document.getElementById("success-box").style.display = "none";
+}
+
+document.addEventListener("keypress", e => { if (e.key === "Enter") login(); });
+</script>
+</body>
+</html>

@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FraudGuard — History</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<nav>
+  <a href="index.html" class="brand">🛡 <span>FraudGuard</span></a>
+  <a href="index.html">Dashboard</a>
+  <a href="predict.html">Analyze</a>
+  <a href="history.html">History</a>
+  <a href="bulk.html">Bulk</a>
+  <a href="analytics.html">Analytics</a>
+  <a href="model.html">Model</a>
+  <a href="alerts.html">Alerts</a>
+</nav>
+
+<div class="container">
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem;flex-wrap:wrap;gap:1rem">
+    <h1 class="page-title" style="margin-bottom:0">Transaction History</h1>
+    <div style="display:flex;gap:.6rem;flex-wrap:wrap">
+      <select id="filter-label" onchange="loadHistory(1)" style="padding:.45rem .8rem;border:1px solid var(--border);border-radius:6px;font-size:.88rem;background:var(--surface)">
+        <option value="">All labels</option>
+        <option value="Fraud">Fraud only</option>
+        <option value="Not Fraud">Legitimate only</option>
+      </select>
+      <select id="filter-risk" onchange="loadHistory(1)" style="padding:.45rem .8rem;border:1px solid var(--border);border-radius:6px;font-size:.88rem;background:var(--surface)">
+        <option value="">All risk levels</option>
+        <option value="CRITICAL">Critical</option>
+        <option value="HIGH">High</option>
+        <option value="MEDIUM">Medium</option>
+        <option value="LOW">Low</option>
+      </select>
+      <button onclick="loadHistory(1)" class="btn btn-outline" style="font-size:.88rem;padding:.4rem .9rem">Refresh</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Transaction ID</th><th>Amount</th><th>Label</th>
+            <th>Risk Score</th><th>Risk Level</th><th>Alert</th><th>Date & Time</th>
+          </tr>
+        </thead>
+        <tbody id="history-body">
+          <tr><td colspan="7" style="text-align:center;color:var(--muted);padding:2rem">Loading...</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="pagination" id="pagination"></div>
+  </div>
+</div>
+
+<script src="js/history.js"></script>
+<script>
+function toggleDark() {
+  document.body.classList.toggle("dark");
+  const btn = document.querySelector(".dark-toggle");
+  const dark = document.body.classList.contains("dark");
+  localStorage.setItem("fg_dark", dark);
+  btn.textContent = dark ? "☀️ Light" : "🌙 Dark";
+}
+// Restore preference on load
+if (localStorage.getItem("fg_dark") === "true") {
+  document.body.classList.add("dark");
+  document.querySelector(".dark-toggle").textContent = "☀️ Light";
+}
+</script>
+</body>
+</html>

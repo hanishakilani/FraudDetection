@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FraudGuard — Bulk Upload</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<nav>
+  <a href="index.html" class="brand">🛡 <span>FraudGuard</span></a>
+  <a href="index.html">Dashboard</a>
+  <a href="predict.html">Analyze</a>
+  <a href="history.html">History</a>
+  <a href="bulk.html">Bulk</a>
+  <a href="analytics.html">Analytics</a>
+  <a href="model.html">Model</a>
+  <a href="alerts.html">Alerts</a>
+</nav>
+
+<div class="container">
+  <div class="card" style="max-width:700px">
+    <h2 style="font-size:1.2rem;margin-bottom:.3rem">Bulk Transaction Analysis</h2>
+    <p style="color:var(--muted);font-size:.88rem;margin-bottom:1.5rem">
+      Upload a CSV file with up to 1000 transactions. Required columns:
+      <code>Time, Amount, V1..V28</code>
+    </p>
+
+    <div id="drop-zone" style="border:2px dashed var(--border);border-radius:var(--radius);padding:3rem;text-align:center;cursor:pointer;transition:border-color .15s"
+         onclick="document.getElementById('csv-file').click()"
+         ondragover="event.preventDefault();this.style.borderColor='var(--primary)'"
+         ondragleave="this.style.borderColor='var(--border)'"
+         ondrop="handleDrop(event)">
+      <div style="font-size:2.5rem;margin-bottom:.5rem">📂</div>
+      <p style="font-weight:500">Drop CSV file here or click to browse</p>
+      <p style="font-size:.82rem;color:var(--muted);margin-top:.3rem">Max 1000 rows · 10MB</p>
+    </div>
+    <input type="file" id="csv-file" accept=".csv" style="display:none" onchange="handleFile(this.files[0])">
+
+    <div id="file-info" style="display:none;margin-top:1rem;padding:.75rem 1rem;background:var(--bg);border-radius:8px;font-size:.88rem">
+      <strong id="file-name"></strong> — <span id="file-size"></span>
+    </div>
+
+    <button class="btn btn-primary" id="upload-btn" style="margin-top:1rem;display:none" onclick="uploadFile()">
+      🚀 Analyze All Transactions
+    </button>
+
+    <!-- Progress -->
+    <div id="progress" style="display:none;margin-top:1rem">
+      <div style="font-size:.88rem;color:var(--muted);margin-bottom:.4rem" id="progress-text">Processing...</div>
+      <div style="background:#e2e8f0;border-radius:999px;height:8px;overflow:hidden">
+        <div id="progress-bar" style="height:100%;width:0%;background:var(--primary);border-radius:999px;transition:width .3s"></div>
+      </div>
+    </div>
+
+    <!-- Results summary -->
+    <div id="results-summary" style="display:none;margin-top:1.5rem"></div>
+
+    <!-- Results table -->
+    <div id="results-table" style="display:none;margin-top:1rem">
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Row</th><th>Amount</th><th>Label</th><th>Risk Score</th><th>Level</th></tr></thead>
+          <tbody id="bulk-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="js/bulk.js"></script>
+<script>
+function toggleDark() {
+  document.body.classList.toggle("dark");
+  const btn = document.querySelector(".dark-toggle");
+  const dark = document.body.classList.contains("dark");
+  localStorage.setItem("fg_dark", dark);
+  btn.textContent = dark ? "☀️ Light" : "🌙 Dark";
+}
+// Restore preference on load
+if (localStorage.getItem("fg_dark") === "true") {
+  document.body.classList.add("dark");
+  document.querySelector(".dark-toggle").textContent = "☀️ Light";
+}
+</script>
+</body>
+</html>

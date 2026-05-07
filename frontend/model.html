@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FraudGuard — Model Performance</title>
+  <link rel="stylesheet" href="css/style.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+</head>
+<body>
+
+<nav>
+  <a href="index.html" class="brand">🛡 <span>FraudGuard</span></a>
+  <a href="index.html">Dashboard</a>
+  <a href="predict.html">Analyze</a>
+  <a href="history.html">History</a>
+  <a href="bulk.html">Bulk</a>
+  <a href="analytics.html">Analytics</a>
+  <a href="model.html">Model</a>
+  <a href="alerts.html">Alerts</a>
+</nav>
+
+<div class="container">
+  <h1 class="page-title">Model Performance <span>· Random Forest + Isolation Forest</span></h1>
+
+  <!-- Model stat cards -->
+  <div class="grid-4" id="model-stats" style="margin-bottom:1.5rem">
+    <div class="stat-card purple">
+      <div class="label">ROC-AUC Score</div>
+      <div class="value" id="roc-auc-val">—</div>
+      <div class="sub">Area under ROC curve</div>
+    </div>
+    <div class="stat-card cyan">
+      <div class="label">PR-AUC Score</div>
+      <div class="value" id="pr-auc-val">—</div>
+      <div class="sub">Precision-recall AUC</div>
+    </div>
+    <div class="stat-card green">
+      <div class="label">Fraud Precision</div>
+      <div class="value" id="precision-val">—</div>
+      <div class="sub">Of flagged, truly fraud</div>
+    </div>
+    <div class="stat-card amber">
+      <div class="label">Fraud Recall</div>
+      <div class="value" id="recall-val">—</div>
+      <div class="sub">Of fraud, correctly caught</div>
+    </div>
+  </div>
+
+  <!-- Main content: fraud table left, curves right -->
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;margin-bottom:1.5rem">
+
+    <!-- Fraud detection transactions table -->
+    <div class="card" style="display:flex;flex-direction:column">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem">
+        <h2 style="margin-bottom:0">FRAUD DETECTION</h2>
+        <span id="fraud-table-auc" style="font-size:.72rem;color:var(--purple-lt);font-weight:600;font-family:var(--mono)">ROC-AUC —</span>
+      </div>
+
+      <div class="table-wrap" style="flex:1">
+        <table>
+          <thead>
+            <tr>
+              <th>Transaction ID</th>
+              <th>Amount</th>
+              <th>Score</th>
+              <th>Flag</th>
+            </tr>
+          </thead>
+          <tbody id="fraud-table-body">
+            <tr><td colspan="4" style="text-align:center;color:var(--text3);padding:2rem">Loading...</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div style="margin-top:1rem;padding-top:1rem;border-top:1px solid var(--border);display:flex;gap:1rem;font-size:.75rem">
+        <span style="display:flex;align-items:center;gap:5px;color:var(--red-lt)">⚠️ Fraud flagged</span>
+        <span style="display:flex;align-items:center;gap:5px;color:var(--green-lt)">✅ Legitimate</span>
+      </div>
+    </div>
+
+    <!-- ROC + PR curves stacked -->
+    <div style="display:flex;flex-direction:column;gap:1rem">
+
+      <!-- ROC-AUC -->
+      <div class="card card-glow-purple" style="flex:1">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.75rem">
+          <h2 style="margin-bottom:0">ROC-AUC</h2>
+          <span id="roc-badge" style="font-size:.7rem;background:rgba(124,58,237,.2);color:var(--purple-lt);padding:.2rem .6rem;border-radius:999px;border:1px solid rgba(124,58,237,.4);font-family:var(--mono)">AUC = —</span>
+        </div>
+        <div style="position:relative;height:180px">
+          <canvas id="rocChart"></canvas>
+        </div>
+        <div style="font-size:.72rem;color:var(--text3);margin-top:.5rem;text-align:center">
+          False Positive Rate → True Positive Rate
+        </div>
+      </div>
+
+      <!-- PR-AUC -->
+      <div class="card card-glow-cyan" style="flex:1">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.75rem">
+          <h2 style="margin-bottom:0">PR-AUC</h2>
+          <span id="pr-badge" style="font-size:.7rem;background:rgba(6,182,212,.15);color:var(--cyan-lt);padding:.2rem .6rem;border-radius:999px;border:1px solid rgba(6,182,212,.4);font-family:var(--mono)">AUC = —</span>
+        </div>
+        <div style="position:relative;height:180px">
+          <canvas id="prChart"></canvas>
+        </div>
+        <div style="font-size:.72rem;color:var(--text3);margin-top:.5rem;text-align:center">
+          Recall → Precision
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Confusion matrix + model info -->
+  <div class="grid-2">
+
+    <!-- Confusion matrix visual -->
+    <div class="card">
+      <h2>Confusion Matrix</h2>
+      <div id="conf-matrix" style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:.5rem">
+        <div style="text-align:center;padding:1.5rem;border-radius:10px;background:rgba(16,185,129,.15);border:1px solid rgba(16,185,129,.3)">
+          <div style="font-size:1.8rem;font-weight:700;color:var(--green-lt)" id="cm-tn">—</div>
+          <div style="font-size:.72rem;color:var(--text2);margin-top:4px;text-transform:uppercase;letter-spacing:.06em">True Negative</div>
+          <div style="font-size:.68rem;color:var(--text3);margin-top:2px">Legit → Legit ✅</div>
+        </div>
+        <div style="text-align:center;padding:1.5rem;border-radius:10px;background:rgba(245,158,11,.1);border:1px solid rgba(245,158,11,.3)">
+          <div style="font-size:1.8rem;font-weight:700;color:var(--amber-lt)" id="cm-fp">—</div>
+          <div style="font-size:.72rem;color:var(--text2);margin-top:4px;text-transform:uppercase;letter-spacing:.06em">False Positive</div>
+          <div style="font-size:.68rem;color:var(--text3);margin-top:2px">Legit → Fraud ⚠️</div>
+        </div>
+        <div style="text-align:center;padding:1.5rem;border-radius:10px;background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.3)">
+          <div style="font-size:1.8rem;font-weight:700;color:var(--red-lt)" id="cm-fn">—</div>
+          <div style="font-size:.72rem;color:var(--text2);margin-top:4px;text-transform:uppercase;letter-spacing:.06em">False Negative</div>
+          <div style="font-size:.68rem;color:var(--text3);margin-top:2px">Fraud → Legit ❌</div>
+        </div>
+        <div style="text-align:center;padding:1.5rem;border-radius:10px;background:rgba(124,58,237,.15);border:1px solid rgba(124,58,237,.3)">
+          <div style="font-size:1.8rem;font-weight:700;color:var(--purple-lt)" id="cm-tp">—</div>
+          <div style="font-size:.72rem;color:var(--text2);margin-top:4px;text-transform:uppercase;letter-spacing:.06em">True Positive</div>
+          <div style="font-size:.68rem;color:var(--text3);margin-top:2px">Fraud → Fraud 🚨</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Model info card -->
+    <div class="card">
+      <h2>Model Configuration</h2>
+      <div style="display:flex;flex-direction:column;gap:.6rem;margin-top:.25rem">
+        <div class="model-info-row">
+          <span>Algorithm</span>
+          <span class="mono" style="color:var(--purple-lt)">Random Forest + Isolation Forest</span>
+        </div>
+        <div class="model-info-row">
+          <span>Estimators</span>
+          <span class="mono" style="color:var(--cyan-lt)" id="inf-estimators">—</span>
+        </div>
+        <div class="model-info-row">
+          <span>SMOTE Balancing</span>
+          <span style="color:var(--green-lt)" id="inf-smote">—</span>
+        </div>
+        <div class="model-info-row">
+          <span>Test Set Size</span>
+          <span class="mono" id="inf-testsize">—</span>
+        </div>
+        <div class="model-info-row">
+          <span>Fraud in Test Set</span>
+          <span class="mono" style="color:var(--red-lt)" id="inf-fraudtest">—</span>
+        </div>
+        <div class="model-info-row">
+          <span>Decision Threshold</span>
+          <span class="mono" style="color:var(--amber-lt)">0.30 (30%)</span>
+        </div>
+        <div class="model-info-row">
+          <span>Combined Score</span>
+          <span class="mono" style="color:var(--text2)">RF×0.7 + ISO×0.3</span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<style>
+.model-info-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: .6rem .75rem;
+  background: rgba(255,255,255,.03);
+  border-radius: 8px;
+  font-size: .84rem;
+}
+.model-info-row > span:first-child { color: var(--text2); }
+</style>
+
+<script src="js/model.js"></script>
+</body>
+</html>
